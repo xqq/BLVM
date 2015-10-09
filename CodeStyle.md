@@ -13,3 +13,5 @@ Difference
 Emphasis
 
 - We do not use C++ exceptions and RTTI.
+- We use LF for line separator. Set autocrlf to true or input in your git-config if you're under Windows.
+- Avoid Non-ASCII characters in source files, and must be UTF-8 encoding.
