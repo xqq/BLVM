@@ -9,7 +9,7 @@ namespace base {
 
     class RefBase {
     protected:
-        explicit RefBase() : ref_count_(0) {}
+        RefBase() : ref_count_(0) {}
 
         virtual ~RefBase() {
             ref_count_ = 0;
@@ -32,7 +32,7 @@ namespace base {
 
     class RefBaseNonAtomic {
     protected:
-        explicit RefBaseNonAtomic() : ref_count_(0) {}
+        RefBaseNonAtomic() : ref_count_(0) {}
 
         virtual ~RefBaseNonAtomic() {
             ref_count_ = 0;

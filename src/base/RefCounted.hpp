@@ -10,7 +10,7 @@ namespace base {
     template <typename T>
     class RefCounted {
     protected:
-        explicit RefCounted() : ref_count_(0) {}
+        RefCounted() : ref_count_(0) {}
 
         ~RefCounted() {
             ref_count_ = 0;
@@ -34,7 +34,7 @@ namespace base {
     template <typename T>
     class RefCountedNonAtomic {
     protected:
-        explicit RefCountedNonAtomic() : ref_count_(0) {}
+        RefCountedNonAtomic() : ref_count_(0) {}
 
         ~RefCountedNonAtomic() {
             ref_count_ = 0;
