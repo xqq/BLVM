@@ -14,7 +14,7 @@ namespace base {
 }
 
 #if defined(__GNUC__) || defined(__clang__)
-    #include "Atomic_GCC.hpp"
+    #include "atomic_gcc.hpp"
 #elif defined(_WIN32) || defined(_MSC_VER)
     #include "Atomic_Win32.hpp"
 #else

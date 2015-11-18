@@ -2,8 +2,8 @@
 #define _BASE_REFBASE_HPP
 
 #include <cstdint>
-#include "Atomic.hpp"
-#include "Noncopyable.hpp"
+#include "atomic.hpp"
+#include "noncopyable.hpp"
 
 namespace base {
 

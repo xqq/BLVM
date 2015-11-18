@@ -1,6 +1,6 @@
 #include <cstdio>
-#include "base/RefBase.hpp"
-#include "base/RefPtr.hpp"
+#include "base/ref_base.hpp"
+#include "base/ref_ptr.hpp"
 
 class FooClass : public base::RefBase {
 public:
