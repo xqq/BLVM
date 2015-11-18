@@ -5,7 +5,7 @@ We use Chromium-like google style.
 
 Difference
 
-- We use lowercase with undersources(_) file naming, e.g. `memory_buffer_ref.cpp`
+- We use lowercase with undersources`_` file naming, e.g. `memory_buffer_ref.cpp`
 - We use `.cpp` suffix for C++ source, `.hpp` suffix for C++ header.
 - We relax the line length restrictions to `120` characters long. (origin: 80)
 - We use `4-spaces` indent, because 2-spaces indent is ugly and unnecessary.
