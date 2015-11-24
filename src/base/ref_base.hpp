@@ -1,10 +1,11 @@
-#ifndef _BASE_REFBASE_HPP
-#define _BASE_REFBASE_HPP
+#ifndef _BLVM_BASE_REFBASE_HPP
+#define _BLVM_BASE_REFBASE_HPP
 
 #include <cstdint>
 #include "atomic.hpp"
 #include "noncopyable.hpp"
 
+namespace blvm {
 namespace base {
 
     class RefBase {
@@ -54,5 +55,6 @@ namespace base {
 
 
 }
+}
 
-#endif // _BASE_REFBASE_HPP
+#endif // _BLVM_BASE_REFBASE_HPP

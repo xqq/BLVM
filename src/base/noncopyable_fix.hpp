@@ -1,6 +1,7 @@
-#ifndef _BASE_NONCOPYABLE_HPP
-#define _BASE_NONCOPYABLE_HPP
+#ifndef _BLVM_BASE_NONCOPYABLE_HPP
+#define _BLVM_BASE_NONCOPYABLE_HPP
 
+namespace blvm {
 namespace base {
 
     class Noncopyable {
@@ -19,5 +20,6 @@ namespace base {
 #endif
 
 }
+}
 
-#endif // _BASE_NONCOPYABLE_HPP
+#endif // _BLVM_BASE_NONCOPYABLE_HPP

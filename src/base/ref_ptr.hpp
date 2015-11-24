@@ -1,8 +1,9 @@
-#ifndef _BASE_REFPTR_HPP
-#define _BASE_REFPTR_HPP
+#ifndef _BLVM_BASE_REFPTR_HPP
+#define _BLVM_BASE_REFPTR_HPP
 
 #include <cassert>
 
+namespace blvm {
 namespace base {
 
     template <typename T>
@@ -129,5 +130,6 @@ namespace base {
     };
 
 }
+}
 
-#endif // _BASE_REFPTR_HPP
+#endif // _BLVM_BASE_REFPTR_HPP

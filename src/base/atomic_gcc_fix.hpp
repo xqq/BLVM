@@ -1,8 +1,9 @@
-#ifndef _BASE_ATOMIC_GCC_HPP
-#define _BASE_ATOMIC_GCC_HPP
+#ifndef _BLVM_BASE_ATOMIC_GCC_HPP
+#define _BLVM_BASE_ATOMIC_GCC_HPP
 
 #include <cstdint>
 
+namespace blvm {
 namespace base {
 
     inline void AtomicIncrease(volatile int32_t* ptr) {
@@ -14,5 +15,6 @@ namespace base {
     }
 
 }
+}
 
-#endif // _BASE_ATOMIC_GCC_HPP
+#endif // _BLVM_BASE_ATOMIC_GCC_HPP

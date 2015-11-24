@@ -1,9 +1,10 @@
-#ifndef _BASE_ATOMIC_WIN32_HPP
-#define _BASE_ATOMIC_WIN32_HPP
+#ifndef _BLVM_BASE_ATOMIC_WIN32_HPP
+#define _BLVM_BASE_ATOMIC_WIN32_HPP
 
 #include <cstdint>
 #include <intrin.h>
 
+namespace blvm {
 namespace base {
 
     inline void AtomicIncrease(volatile int32_t* ptr) {
@@ -15,5 +16,6 @@ namespace base {
     }
 
 }
+}
 
-#endif // _BASE_ATOMIC_WIN32_HPP
+#endif // _BLVM_BASE_ATOMIC_WIN32_HPP

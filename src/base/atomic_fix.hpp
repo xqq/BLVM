@@ -1,8 +1,9 @@
-#ifndef _BASE_ATOMIC_HPP
-#define _BASE_ATOMIC_HPP
+#ifndef _BLVM_BASE_ATOMIC_HPP
+#define _BLVM_BASE_ATOMIC_HPP
 
 #include <cstdint>
 
+namespace blvm {
 namespace base {
 
     // Increase a int32 value by 1.
@@ -11,6 +12,7 @@ namespace base {
     // Decrease a int32 value by 1, and return whether the result is non-zero.
     inline bool AtomicDecrease(volatile int32_t* ptr);
 
+}
 }
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -21,4 +23,4 @@ namespace base {
     #error "Unsupported compiler"
 #endif
 
-#endif // _BASE_ATOMIC_HPP
+#endif // _BLVM_BASE_ATOMIC_HPP

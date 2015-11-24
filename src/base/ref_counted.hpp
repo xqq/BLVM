@@ -1,10 +1,11 @@
-#ifndef _BASE_RECOUNTED_HPP
-#define _BASE_RECOUNTED_HPP
+#ifndef _BLVM_BASE_RECOUNTED_HPP
+#define _BLVM_BASE_RECOUNTED_HPP
 
 #include <cstdint>
 #include "atomic.hpp"
 #include "noncopyable.hpp"
 
+namespace blvm {
 namespace base {
 
     template <typename T>
@@ -56,6 +57,6 @@ namespace base {
 
 
 }
+}
 
-
-#endif // _BASE_RECOUNTED_HPP
+#endif // _BLVM_BASE_RECOUNTED_HPP
