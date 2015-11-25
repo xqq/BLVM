@@ -2,6 +2,7 @@
 #define _BLVM_BASE_RECOUNTED_HPP
 
 #include <cstdint>
+#include <cassert>
 #include "atomic.hpp"
 #include "noncopyable.hpp"
 
@@ -14,7 +15,7 @@ namespace base {
         RefCounted() : ref_count_(0) {}
 
         ~RefCounted() {
-            ref_count_ = 0;
+            assert(ref_count_ == 0);
         }
     public:
         void AddRef() {
@@ -38,7 +39,7 @@ namespace base {
         RefCountedNonAtomic() : ref_count_(0) {}
 
         ~RefCountedNonAtomic() {
-            ref_count_ = 0;
+            assert(ref_count_ == 0);
         }
     public:
         void AddRef() {

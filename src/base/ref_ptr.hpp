@@ -2,6 +2,7 @@
 #define _BLVM_BASE_REFPTR_HPP
 
 #include <cassert>
+#include <utility>
 
 namespace blvm {
 namespace base {
@@ -84,6 +85,17 @@ namespace base {
             return operator=(r.Get());
         }
 
+        RefPtr<T> operator=(RefPtr<T>&& r) {
+            RefPtr<T>(std::move(r)).Swap(*this);
+            return *this;
+        }
+
+        template <typename U>
+        RefPtr<T> operator=(RefPtr<U>&& r) {
+            RefPtr<T>(std::move(r)).Swap(*this);
+            return *this;
+        }
+
         template <typename U>
         bool operator==(const RefPtr<U>& rhs) const {
             return ptr_ == rhs.Get();
@@ -113,7 +125,7 @@ namespace base {
             *pp = old;
         }
 
-        void Swap(const RefPtr<T>& r) {
+        void Swap(RefPtr<T>& r) {
             Swap(&r.ptr_);
         }
     private:
