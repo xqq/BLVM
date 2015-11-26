@@ -9,6 +9,10 @@ else()
 endif()
 
 aux_source_directory(src SOURCE_FILES)
+aux_source_directory(src/base SOURCE_FILES)
+aux_source_directory(src/bitcode SOURCE_FILES)
+aux_source_directory(src/core SOURCE_FILES)
+
 add_library(BLVM STATIC ${SOURCE_FILES})
 
 add_subdirectory(tools/bli)

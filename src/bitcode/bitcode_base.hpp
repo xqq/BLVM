@@ -42,11 +42,14 @@ namespace bitcode {
     typedef base::RefPtr<Abbreviation> AbbrevRef;
 
     struct BlockInfo {
+    public:
         int block_id;
         std::vector<AbbrevRef> abbrevs;
         std::string block_name;
 
         std::vector<std::pair<int, std::string>> record_names;
+    private:
+        DISALLOW_COPY_AND_ASSIGN(BlockInfo);
     };
 
     struct Block {
@@ -115,7 +118,8 @@ namespace bitcode {
     public:
         AbbrevOp() : value_(0), is_literal_(false), encoding_(Encoding::kNull) {}
         explicit AbbrevOp(uint64_t value) : value_(value), is_literal_(true), encoding_(Encoding::kNull) {}
-        explicit AbbrevOp(Encoding encoding, uint64_t value = 0) : value_(value), is_literal_(false), encoding_(encoding) {}
+        explicit AbbrevOp(Encoding encoding, uint64_t value = 0) :
+                value_(value), is_literal_(false), encoding_(encoding) {}
 
         bool IsLiteral() const {
             return is_literal_;
@@ -143,6 +147,7 @@ namespace bitcode {
         bool is_literal_;
         Encoding encoding_;
     };
+
 
     bool AbbrevOp::HasEncodingData(Encoding encoding) {
         switch (encoding) {

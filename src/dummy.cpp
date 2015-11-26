@@ -1,9 +1,9 @@
 #include <cstdio>
 #include "base/ref_base.hpp"
 #include "base/ref_ptr.hpp"
+#include "base/error_handling.hpp"
 #include "bitcode/bitcode_base.hpp"
 #include "bitcode/bitcode_llvm.hpp"
-#include "base/error_handling.hpp"
 #include "core/blvm_context.hpp"
 #include "core/module.hpp"
 
@@ -27,7 +27,7 @@ namespace blvm {
 
     int dummy_func(void *ptr) {
         base::RefPtr<FooClass> pfoo = new FooClass;
-        return pfoo->Fuck(*reinterpret_cast<int *>(ptr));
+        return pfoo->Fuck(*reinterpret_cast<int*>(ptr));
     }
 
 }
