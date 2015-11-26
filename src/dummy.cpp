@@ -4,6 +4,8 @@
 #include "bitcode/bitcode_base.hpp"
 #include "bitcode/bitcode_llvm.hpp"
 #include "base/error_handling.hpp"
+#include "core/blvm_context.hpp"
+#include "core/module.hpp"
 
 namespace blvm {
 

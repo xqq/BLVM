@@ -18,11 +18,11 @@ namespace base {
             assert(ref_count_ == 0);
         }
     public:
-        void AddRef() {
+        void AddRef() const {
             AtomicIncrease(&ref_count_);
         }
 
-        void Release() {
+        void Release() const {
             if (!AtomicDecrease(&ref_count_))
                 delete static_cast<const T*>(this);
         }
@@ -42,11 +42,11 @@ namespace base {
             assert(ref_count_ == 0);
         }
     public:
-        void AddRef() {
+        void AddRef() const {
             ++ref_count_;
         }
 
-        void Release() {
+        void Release() const {
             if (0 == --ref_count_)
                 delete static_cast<const T*>(this);
         }
