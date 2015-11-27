@@ -18,7 +18,7 @@ namespace base {
 #if defined(__GNUC__) || defined(__clang__)
     #include "atomic_gcc.hpp"
 #elif defined(_WIN32) || defined(_MSC_VER)
-    #include "Atomic_Win32.hpp"
+    #include "atomic_win32.hpp"
 #else
     #error "Unsupported compiler"
 #endif
