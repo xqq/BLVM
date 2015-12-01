@@ -2,6 +2,7 @@
 #define _BLVM_BASE_MEMORY_BUFFER_HPP
 
 #include <cstdint>
+#include "noncopyable.hpp"
 
 namespace blvm {
 namespace base {
@@ -16,7 +17,10 @@ namespace base {
         MemoryBuffer(int allocate_method, uint8_t* existing_address, size_t size);
         MemoryBuffer(int allocate_method, uint8_t* begin, uint8_t* end);
         MemoryBuffer(int allocate_method, size_t allocate_size);
+        MemoryBuffer(MemoryBuffer&& rhs) = default;
         ~MemoryBuffer();
+
+        MemoryBuffer& operator=(MemoryBuffer&& rhs) = default;
 
         int ReadBytes(uint8_t* dest, int begin_index, int length) const;
 
@@ -37,6 +41,8 @@ namespace base {
         uint8_t* begin_;
         uint8_t* end_;
         bool allocate_internal_;
+
+        DISALLOW_COPY_AND_ASSIGN(MemoryBuffer);
     };
 
 }

@@ -27,6 +27,12 @@
     #define NDEBUG
 #endif
 
+#ifdef __GNUC__
+    #define BLVM_CRASH() __builtin_trap()
+#else
+    #define BLVM_CRASH() (*reinterpret_cast<volatile int*>(0)=0)
+#endif
+
 namespace blvm {
 namespace base {
 

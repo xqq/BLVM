@@ -42,12 +42,15 @@ namespace bitcode {
     typedef base::RefPtr<Abbreviation> AbbrevRef;
 
     struct BlockInfo {
-    public:
         int block_id;
         std::vector<AbbrevRef> abbrevs;
         std::string block_name;
 
         std::vector<std::pair<int, std::string>> record_names;
+    public:
+        BlockInfo() = default;
+        BlockInfo(BlockInfo&& rhs) = default;
+        BlockInfo& operator=(BlockInfo&& rhs) = default;
     private:
         DISALLOW_COPY_AND_ASSIGN(BlockInfo);
     };
@@ -60,7 +63,7 @@ namespace bitcode {
 
         explicit Block(int abbrevid_len) : block_id(0), block_size(0), abbrevid_length(abbrevid_len) {}
 
-        explicit Block(Block&& rhs) {
+        Block(Block&& rhs) {
             operator=(std::move(rhs));
         }
 
