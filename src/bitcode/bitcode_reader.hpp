@@ -24,28 +24,27 @@ namespace bitcode {
     public:
         BitcodeReader(core::BLVMContext& context, core::Module& module, base::MemoryBuffer& bitcode_buffer);
         ~BitcodeReader();
-        word_t Read(int bits);
-        uint32_t ReadVBR(int bits);
-        uint64_t ReadVBR64(int bits);
+        word_t Read(uint32_t bits);
+        uint32_t ReadVBR(uint32_t bits);
+        uint64_t ReadVBR64(uint32_t bits);
         Entry ReadNextEntry();
-        bool EnterSubBlock(int block_id);
-        bool SkipSubBlock(int block_id);
+        bool EnterSubBlock(uint32_t block_id);
+        bool SkipSubBlock(uint32_t block_id);
         bool ReadBlockEnd();
-
     private:
         void FillCurrentWord();
         void SkipTo32bitsBoundary();
         int GetCurrentBitPos();
-        void SeekToBitPos(int bit_pos);
+        void SeekToBitPos(uint32_t bit_pos);
     private:
         core::BLVMContext& context_;
         core::Module& module_;
 
         base::MemoryBuffer& buffer_;
-        int buffer_index_;
+        uint32_t buffer_index_;
 
         word_t current_word_;
-        int current_word_bits_left_;
+        uint32_t current_word_bits_left_;
 
         Block current_block_;
         std::stack<Block> block_stack_;

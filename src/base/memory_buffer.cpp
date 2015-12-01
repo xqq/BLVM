@@ -19,7 +19,6 @@ namespace base {
 
     MemoryBuffer::MemoryBuffer(int allocate_method, size_t allocate_size) {
         assert(allocate_method == kAllocateInternally);
-        assert(allocate_size > 0);
 
         begin_ = new uint8_t[allocate_size];
         end_ = begin_ + allocate_size;
@@ -33,9 +32,8 @@ namespace base {
         }
     }
 
-    int MemoryBuffer::ReadBytes(uint8_t* dest, int begin_index, int length) const {
-        assert(begin_index >= 0 && length > 0);
-        uint8_t* src_begin = begin_ + begin_index;
+    int MemoryBuffer::ReadBytes(uint8_t* dest, uint32_t begin_offset, size_t length) const {
+        uint8_t* src_begin = begin_ + begin_offset;
         uint8_t* expect_end = src_begin + length;
         if (expect_end > end_)
             expect_end = end_;
@@ -49,9 +47,8 @@ namespace base {
         return copy_length;
     }
 
-    const uint8_t* MemoryBuffer::GetAddressAt(int index) const {
-        assert(index >= 0);
-        uint8_t* addr = begin_ + index;
+    const uint8_t* MemoryBuffer::GetAddressAt(uint32_t offset) const {
+        uint8_t* addr = begin_ + offset;
         if (addr >= end_)
             return nullptr;
         return addr;

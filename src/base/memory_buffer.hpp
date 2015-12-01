@@ -22,9 +22,9 @@ namespace base {
 
         MemoryBuffer& operator=(MemoryBuffer&& rhs) = default;
 
-        int ReadBytes(uint8_t* dest, int begin_index, int length) const;
+        int ReadBytes(uint8_t* dest, uint32_t begin_offset, size_t length) const;
 
-        const uint8_t* GetAddressAt(int index) const;
+        const uint8_t* GetAddressAt(uint32_t offset) const;
 
         const uint8_t* begin() const {
             return begin_;
@@ -34,8 +34,8 @@ namespace base {
             return end_;
         }
 
-        int size() const {
-            return (int)(end_ - begin_);
+        size_t size() const {
+            return static_cast<size_t>(end_ - begin_);
         }
     private:
         uint8_t* begin_;
