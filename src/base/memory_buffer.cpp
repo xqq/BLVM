@@ -32,12 +32,12 @@ namespace base {
         }
     }
 
-    int MemoryBuffer::ReadBytes(uint8_t* dest, uint32_t begin_offset, size_t length) const {
+    size_t MemoryBuffer::ReadBytes(uint8_t* dest, size_t begin_offset, size_t length) const {
         uint8_t* src_begin = begin_ + begin_offset;
         uint8_t* expect_end = src_begin + length;
         if (expect_end > end_)
             expect_end = end_;
-        int copy_length = (int)(expect_end - src_begin);
+        size_t copy_length = (size_t)(expect_end - src_begin);
 
         if (copy_length == sizeof(size_t)) {
             *(size_t*)dest = *(size_t*)src_begin;
@@ -47,7 +47,7 @@ namespace base {
         return copy_length;
     }
 
-    const uint8_t* MemoryBuffer::GetAddressAt(uint32_t offset) const {
+    const uint8_t* MemoryBuffer::GetAddressAt(size_t offset) const {
         uint8_t* addr = begin_ + offset;
         if (addr >= end_)
             return nullptr;

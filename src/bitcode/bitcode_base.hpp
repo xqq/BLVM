@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include "../base/error_handling.hpp"
 #include "../base/ref_counted.hpp"
 #include "../base/ref_ptr.hpp"
 
@@ -56,11 +57,12 @@ namespace bitcode {
     };
 
     struct Block {
-        int block_id;
-        int block_size;
-        int abbrevid_length;
+        uint32_t block_id;
+        uint32_t block_size;
+        uint32_t abbrevid_length;
         std::vector<AbbrevRef> abbrevs;
 
+        Block() : block_id(0), block_size(0), abbrevid_length(0) {}
         explicit Block(int abbrevid_len) : block_id(0), block_size(0), abbrevid_length(abbrevid_len) {}
 
         Block(Block&& rhs) {
@@ -137,7 +139,7 @@ namespace bitcode {
             return encoding_;
         }
 
-        int64_t GetEncodingExtraData() const {
+        uint64_t GetEncodingExtraData() const {
             return value_;
         }
     public:
@@ -162,7 +164,7 @@ namespace bitcode {
             case Encoding::kBlob:
                 return false;
             default:
-                assert(false);
+                BLVM_UNREACHABLE("Impossible encoding type!");
         }
         return false;
     }
@@ -190,7 +192,7 @@ namespace bitcode {
             return 62;
         if (c == '_')
             return 63;
-        assert(false);
+        BLVM_UNREACHABLE("Cannot be encoded in char6 form");
         return 0;
     }
 
@@ -205,7 +207,7 @@ namespace bitcode {
             return '.';
         if (input == 63)
             return '_';
-        assert(false);
+        BLVM_UNREACHABLE("Cannot be decode by char6");
         return '\0';
     }
 

@@ -4,30 +4,22 @@
 #include <cassert>
 
 #ifndef NDEBUG
-    #define DCHECK(x) assert(x)
+    #define DCHECK(condition) assert(condition)
 #else
-    #define DCHECK(x)
+    #define DCHECK(condition)
 #endif
 
 
-#ifndef NDEBUG
-    #define CHECK(x) assert(x)
+#define CHECK(condition) assert(condition)
+
+
+#if defined(__GNUC__)
+    #define BLVM_UNREACHABLE(str) assert(false && str)
 #else
-    #undef NDEBUG
-    #define CHECK(x) assert(x)
-    #define NDEBUG
+    #define BLVM_UNREACHABLE(str) assert(false && str)
 #endif
 
-
-#ifndef NDEBUG
-    #define UNREACHABLE(str) assert(false && str)
-#else
-    #undef NDEBUG
-    #define UNREACHABLE(str) assert(false && str)
-    #define NDEBUG
-#endif
-
-#ifdef __GNUC__
+#if defined(__GNUC__)
     #define BLVM_CRASH() __builtin_trap()
 #else
     #define BLVM_CRASH() (*reinterpret_cast<volatile int*>(0)=0)
