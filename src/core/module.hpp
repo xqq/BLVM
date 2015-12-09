@@ -17,6 +17,8 @@ namespace core {
         std::string target_triple;
         std::string target_datalayout;
         std::vector<TypeRef> type_table;
+        std::vector<std::string> section_name_table;
+        std::vector<std::string> gc_name_table;
     public:
         Module();
     private:

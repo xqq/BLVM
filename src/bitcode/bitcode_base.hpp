@@ -43,13 +43,13 @@ namespace bitcode {
     typedef base::RefPtr<Abbreviation> AbbrevRef;
 
     struct BlockInfo {
-        int block_id;
+        uint32_t block_id;
         std::vector<AbbrevRef> abbrevs;
         std::string block_name;
 
-        std::vector<std::pair<int, std::string>> record_names;
+        std::vector<std::pair<uint32_t, std::string>> record_names;
     public:
-        BlockInfo() = default;
+        BlockInfo() : block_id(0) {}
         BlockInfo(BlockInfo&& rhs) = default;
         BlockInfo& operator=(BlockInfo&& rhs) = default;
     private:

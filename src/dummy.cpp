@@ -6,6 +6,7 @@
 #include "bitcode/bitcode_llvm.hpp"
 #include "core/blvm_context.hpp"
 #include "core/module.hpp"
+#include "base/logging.hpp"
 
 namespace blvm {
 

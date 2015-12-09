@@ -5,8 +5,8 @@
 namespace blvm {
 namespace bitcode {
 
-    BitcodeReader::BitcodeReader(core::BLVMContext& context, core::Module& module, base::MemoryBuffer& bitcode_buffer) :
-            context_(context), module_(module), buffer_(bitcode_buffer),
+    BitcodeReader::BitcodeReader(ParsingContext& parsing_context, base::MemoryBuffer& bitcode_buffer) :
+            parsing_context_(parsing_context), buffer_(bitcode_buffer),
             buffer_index_(0), current_word_(0), current_word_bits_left_(0), current_block_(2) {
         FillCurrentWord();
     }
@@ -24,7 +24,7 @@ namespace bitcode {
                 case BuiltinAbbrevId::kEnterSubBlock:
                     return Entry::MakeSubBlock(ReadSubBlockId());
                 case BuiltinAbbrevId::kDefineAbbrev:
-                    ReadAbbrevRecord();
+                    current_block_.abbrevs.push_back(ReadAbbrevDefinition());
                     continue;
                 case BuiltinAbbrevId::kUnabbrevRecord:
                 default:
@@ -38,7 +38,7 @@ namespace bitcode {
         if (buffer_bytes_left <= 0)
             throw ReaderException(ReaderError::kEof);
 
-        size_t expect_bytes = buffer_bytes_left >= sizeof(word_t) ? sizeof(word_t) : (size_t)buffer_bytes_left;
+        size_t expect_bytes = (size_t)buffer_bytes_left >= sizeof(word_t) ? sizeof(word_t) : (size_t)buffer_bytes_left;
         size_t bytes_read = buffer_.ReadBytes(reinterpret_cast<uint8_t*>(&current_word_), buffer_index_, expect_bytes);
         if (bytes_read != expect_bytes)
             throw ReaderException(ReaderError::kDataNotEnough);
@@ -188,7 +188,7 @@ namespace bitcode {
     }
 
     // Having read the DEFINE_ABBREV abbrevid
-    void BitcodeReader::ReadAbbrevRecord() {
+    AbbrevRef BitcodeReader::ReadAbbrevDefinition() {
         base::RefPtr<Abbreviation> abbrev = new Abbreviation();
 
         int numops = ReadVBR(5);
@@ -214,10 +214,10 @@ namespace bitcode {
             }
             abbrev->AddOperand(std::move(AbbrevOp(encoding, value)));
         }
-        current_block_.abbrevs.push_back(abbrev);
+        return abbrev;
     }
 
-    uint64_t BitcodeReader::ReadAbbrevOp(const AbbrevOp& op) {  // TODO
+    uint64_t BitcodeReader::ReadAbbrevOp(const AbbrevOp& op) {
         DCHECK(!op.IsLiteral());
 
         switch (op.GetEncoding()) {
@@ -245,12 +245,12 @@ namespace bitcode {
         return current_block_.abbrevs[abbrev_index];
     }
 
-    uint32_t BitcodeReader::ReadRecord(uint32_t abbrevid, std::vector<uint32_t>& out_ops) {
+    uint32_t BitcodeReader::ReadRecord(uint32_t abbrevid, std::vector<uint64_t>& out_ops) {
         if (abbrevid == BuiltinAbbrevId::kUnabbrevRecord) {
             uint32_t code = ReadVBR(6);
             uint32_t numops = ReadVBR(6);
             for (uint32_t i = 0; i < numops; i++)
-                out_ops.push_back(ReadVBR(6));
+                out_ops.push_back(ReadVBR64(6));
             return code;
         }
 
@@ -274,13 +274,13 @@ namespace bitcode {
         for (size_t i = 1; i < op_count; i++) {
             const AbbrevOp& op = abbrev->GetOperandInfoAt(i);
             if (op.IsLiteral()) {
-                out_ops.push_back((uint32_t)op.GetLiteralValue());
+                out_ops.push_back(op.GetLiteralValue());
                 continue;
             }
 
             AbbrevOp::Encoding encoding = op.GetEncoding();
             if (encoding != AbbrevOp::Encoding::kArray && encoding != AbbrevOp::Encoding::kBlob) {
-                out_ops.push_back((uint32_t)ReadAbbrevOp(op));
+                out_ops.push_back(ReadAbbrevOp(op));
                 continue;
             }
 
@@ -291,7 +291,7 @@ namespace bitcode {
                 const AbbrevOp& element = abbrev->GetOperandInfoAt(++i);
 
                 for (uint32_t j = 0; j < element_count; j++) {
-                    out_ops.push_back((uint32_t)ReadAbbrevOp(element));
+                    out_ops.push_back(ReadAbbrevOp(element));
                 }
                 continue;
             }
@@ -304,14 +304,14 @@ namespace bitcode {
             size_t target_bitpos = current_bitpos + ((element_count + 3) & ~3) * 8;
 
             if (!IsValidBytePos(target_bitpos / 8)) {
-                for (int k = 0; k < element_count; k++)
+                for (uint32_t k = 0; k < element_count; k++)
                     out_ops.push_back(0);
                 buffer_index_ = buffer_.size();
                 break;
             } else {
                 const uint8_t* ptr = buffer_.GetAddressAt(current_bitpos / 8);
 
-                for (int k = 0; k < element_count; k++) {
+                for (uint32_t k = 0; k < element_count; k++) {
                     out_ops.push_back(*ptr++);
                 }
             }

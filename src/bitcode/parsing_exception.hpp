@@ -6,7 +6,10 @@
 namespace blvm {
 namespace bitcode {
 
-    enum ReaderError : int {
+    // TODO: pass message, __FILE__, __LINE__, __FUNC__, etc. params to exception object,
+    // TODO: In order to to report a detailed error to upper-layer.
+
+    enum class ReaderError : int {
         kEof = 1,
         kDataNotEnough = 2,
         kDataError = 3,
@@ -15,29 +18,30 @@ namespace bitcode {
 
     class ReaderException : public std::exception {
     public:
-        explicit ReaderException(int error_code) : code_(error_code) {}
+        explicit ReaderException(ReaderError error_code) : code_(error_code) {}
         virtual ~ReaderException() = default;
         int code() {
-            return code_;
+            return static_cast<int>(code_);
         }
     private:
-        int code_;
+        ReaderError code_;
     };
 
 
-    enum ParserError : int {
-        kNull = 0
+    enum class ParserError : int {
+        kDataError = 1,
+        kNotSupproted = 2,
     };
 
     class ParserException : public std::exception {
     public:
-        explicit ParserException(int error_code) : code_(error_code) {}
+        explicit ParserException(ParserError error_code) : code_(error_code) {}
         virtual ~ParserException() = default;
         int code() {
-            return code_;
+            return static_cast<int>(code_);
         }
     private:
-        int code_;
+        ParserError code_;
     };
 
 }

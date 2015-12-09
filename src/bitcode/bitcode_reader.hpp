@@ -6,14 +6,9 @@
 #include <vector>
 #include "../base/noncopyable.hpp"
 #include "../base/memory_buffer.hpp"
+#include "../core/core_fwd.hpp"
+#include "parsing_context.hpp"
 #include "bitcode_base.hpp"
-
-namespace blvm {
-namespace core {
-    class BLVMContext;
-    class Module;
-}
-}
 
 namespace blvm {
 namespace bitcode {
@@ -23,7 +18,7 @@ namespace bitcode {
         typedef size_t word_t;
         struct Entry;
     public:
-        BitcodeReader(core::BLVMContext& context, core::Module& module, base::MemoryBuffer& bitcode_buffer);
+        BitcodeReader(ParsingContext& parsing_context, base::MemoryBuffer& bitcode_buffer);
         ~BitcodeReader();
         word_t Read(uint32_t bits);
         uint32_t ReadVBR(uint32_t bits);
@@ -33,7 +28,8 @@ namespace bitcode {
         void EnterSubBlock(uint32_t block_id);
         void SkipSubBlock(uint32_t block_id);
         void ReadBlockEnd();
-        uint32_t ReadRecord(uint32_t abbrevid, std::vector<uint32_t>& out_ops);
+        AbbrevRef ReadAbbrevDefinition();
+        uint32_t ReadRecord(uint32_t abbrevid, std::vector<uint64_t>& out_ops);
     private:
         void FillCurrentWord();
         void SkipTo32bitsBoundary();
@@ -41,12 +37,10 @@ namespace bitcode {
         bool IsValidBytePos(size_t byte_pos);
         void SeekToBitPos(size_t bit_pos);
         void PopBlockScope();
-        void ReadAbbrevRecord();
         uint64_t ReadAbbrevOp(const AbbrevOp& op);
         AbbrevRef GetAbbreviationById(uint32_t abbrevid);
     private:
-        core::BLVMContext& context_;
-        core::Module& module_;
+        ParsingContext& parsing_context_;
 
         base::MemoryBuffer& buffer_;
         size_t buffer_index_;
@@ -72,7 +66,7 @@ namespace bitcode {
         Kind kind;
         uint32_t id;
 
-        explicit Entry(Kind _kind) : kind(_kind) {}
+        explicit Entry(Kind _kind) : kind(_kind), id(0) {}
         Entry(Kind _kind, uint32_t _id) : kind(_kind), id(_id) {}
 
         static Entry MakeError() {

@@ -1,6 +1,7 @@
 #ifndef _BLVM_BITCODE_PARSING_CONTEXT_HPP
 #define _BLVM_BITCODE_PARSING_CONTEXT_HPP
 
+#include <cstdint>
 #include <vector>
 #include <utility>
 #include "../base/memory_buffer.hpp"
@@ -14,8 +15,8 @@ namespace bitcode {
     public:
         explicit ParsingContext(base::MemoryBuffer&& bitcode_buffer);
         bool HasBlockInfos();
-        BlockInfo* GetBlockInfo(int block_id);
-        BlockInfo* GetOrCreateBlockInfo(int block_id);
+        BlockInfo* GetBlockInfo(uint32_t block_id);
+        BlockInfo* GetOrCreateBlockInfo(uint32_t block_id);
     private:
         base::MemoryBuffer bitcode_storage_;
         std::vector<BlockInfo> block_infos;

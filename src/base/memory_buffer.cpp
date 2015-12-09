@@ -29,6 +29,7 @@ namespace base {
         if (allocate_internal_) {
             delete [] begin_;
             begin_ = end_ = nullptr;
+            allocate_internal_ = false;
         }
     }
 
