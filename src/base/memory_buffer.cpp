@@ -21,6 +21,7 @@ namespace base {
         assert(allocate_method == kAllocateInternally);
 
         begin_ = new uint8_t[allocate_size];
+        memset(begin_, 0, allocate_size);
         end_ = begin_ + allocate_size;
         allocate_internal_ = true;
     }
