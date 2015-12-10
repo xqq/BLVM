@@ -135,7 +135,9 @@ namespace bitcode {
             return value_;
         }
 
+        // Check IsLiteral() first. Literal op has no encoding data, an assertion will occur.
         Encoding GetEncoding() const {
+            assert(!is_literal_);
             return encoding_;
         }
 
@@ -143,73 +145,67 @@ namespace bitcode {
             return value_;
         }
     public:
-        static bool HasEncodingData(Encoding encoding);
-        static bool CanEncodeInChar6(char c);
-        static unsigned EncodeChar6(char c);
-        static char DecodeChar6(unsigned input);
+        static bool HasEncodingData(Encoding encoding) {
+            switch (encoding) {
+                case Encoding::kFixed:
+                case Encoding::kVBR:
+                    return true;
+                case Encoding::kArray:
+                case Encoding::kChar6:
+                case Encoding::kBlob:
+                    return false;
+                default:
+                    BLVM_UNREACHABLE("Impossible encoding type!");
+            }
+            return false;
+        }
+
+        static bool CanEncodeInChar6(char c) {
+            if (c >= 'a' && c <= 'z')
+                return true;
+            if (c >= 'A' && c <= 'Z')
+                return true;
+            if (c >= '0' && c <= '9')
+                return true;
+            if (c == '.' || c == '_')
+                return true;
+            return false;
+        }
+
+        static unsigned EncodeChar6(char c) {
+            if (c >= 'a' && c <= 'z')
+                return c - 'a';
+            if (c >= 'A' && c <= 'Z')
+                return c - 'A' + 26;
+            if (c >= '0' && c <= '9')
+                return c - '0' + 26 + 26;
+            if (c == '.')
+                return 62;
+            if (c == '_')
+                return 63;
+            BLVM_UNREACHABLE("Cannot be encoded in char6 form");
+            return 0;
+        }
+
+        static char DecodeChar6(unsigned input) {
+            if (input <= 25)
+                return input + 'a';
+            if (input <= 51)
+                return input - 26 + 'A';
+            if (input <= 61)
+                return input - 52 + '0';
+            if (input == 62)
+                return '.';
+            if (input == 63)
+                return '_';
+            BLVM_UNREACHABLE("Cannot be decode by char6");
+            return '\0';
+        }
     private:
         uint64_t value_;
         bool is_literal_;
         Encoding encoding_;
     };
-
-
-    bool AbbrevOp::HasEncodingData(Encoding encoding) {
-        switch (encoding) {
-            case Encoding::kFixed:
-            case Encoding::kVBR:
-                return true;
-            case Encoding::kArray:
-            case Encoding::kChar6:
-            case Encoding::kBlob:
-                return false;
-            default:
-                BLVM_UNREACHABLE("Impossible encoding type!");
-        }
-        return false;
-    }
-
-    bool AbbrevOp::CanEncodeInChar6(char c) {
-        if (c >= 'a' && c <= 'z')
-            return true;
-        if (c >= 'A' && c <= 'Z')
-            return true;
-        if (c >= '0' && c <= '9')
-            return true;
-        if (c == '.' || c == '_')
-            return true;
-        return false;
-    }
-
-    unsigned AbbrevOp::EncodeChar6(char c) {
-        if (c >= 'a' && c <= 'z')
-            return c - 'a';
-        if (c >= 'A' && c <= 'Z')
-            return c - 'A' + 26;
-        if (c >= '0' && c <= '9')
-            return c - '0' + 26 + 26;
-        if (c == '.')
-            return 62;
-        if (c == '_')
-            return 63;
-        BLVM_UNREACHABLE("Cannot be encoded in char6 form");
-        return 0;
-    }
-
-    char AbbrevOp::DecodeChar6(unsigned input) {
-        if (input <= 25)
-            return input + 'a';
-        if (input <= 51)
-            return input - 26 + 'A';
-        if (input <= 61)
-            return input - 52 + '0';
-        if (input == 62)
-            return '.';
-        if (input == 63)
-            return '_';
-        BLVM_UNREACHABLE("Cannot be decode by char6");
-        return '\0';
-    }
 
 }
 }

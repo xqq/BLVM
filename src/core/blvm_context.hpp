@@ -3,16 +3,15 @@
 
 #include "../base/noncopyable.hpp"
 #include "../base/ref_ptr.hpp"
+#include "type.hpp"
 
 namespace blvm {
 namespace core {
 
-    class Type;
-    typedef base::RefPtr<Type> TypeRef;
-
     class BLVMContext {
     public:
         BLVMContext();
+        ~BLVMContext();
     private:
         TypeRef type_void_, type_half_, type_float_, type_double_;
         TypeRef type_x86_fp80_, type_x86_mmx, type_fp128_, type_ppc_fp128_;
