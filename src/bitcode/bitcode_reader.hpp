@@ -17,18 +17,35 @@ namespace bitcode {
     public:
         typedef size_t word_t;
         struct Entry;
+
+        enum : int {
+            kDontProcessAbbrevDefinitions = 1
+        };
     public:
-        BitcodeReader(ParsingContext& parsing_context, base::MemoryBuffer& bitcode_buffer);
+        BitcodeReader(ParsingContext& parsing_context, const base::MemoryBuffer& bitcode_buffer);
         ~BitcodeReader();
+
         word_t Read(uint32_t bits);
         uint32_t ReadVBR(uint32_t bits);
         uint64_t ReadVBR64(uint32_t bits);
-        Entry ReadNextEntry();
+        Entry ReadNextEntry(int flags = 0);
+
+        // Having read the ENTER_SUBBLOCK abbrevid (by ReadNextEntry())
         uint32_t ReadSubBlockId();
+
+        // Having read the ENTER_SUBBLOCK abbrevid, and the blockid(vbr8) operand
         void EnterSubBlock(uint32_t block_id);
+
+        // Having read the ENTER_SUBBLOCK abbrevid, and the blockid(vbr8) operand
         void SkipSubBlock(uint32_t block_id);
+
+        // Having read the END_BLOCK abbrevid (by ReadNextEntry())
         void ReadBlockEnd();
+
+        // Having read the DEFINE_ABBREV abbrevid (by ReadNextEntry())
         AbbrevRef ReadAbbrevDefinition();
+
+        // UNABBREV_RECORD or processed abbrev record
         uint32_t ReadRecord(uint32_t abbrevid, std::vector<uint64_t>& out_ops);
     private:
         void FillCurrentWord();
@@ -42,7 +59,7 @@ namespace bitcode {
     private:
         ParsingContext& parsing_context_;
 
-        base::MemoryBuffer& buffer_;
+        const base::MemoryBuffer& buffer_;
         size_t buffer_index_;
 
         word_t current_word_;

@@ -8,7 +8,11 @@ namespace bitcode {
     ParsingContext::ParsingContext(base::MemoryBuffer&& bitcode_buffer) :
             bitcode_storage_(std::move(bitcode_buffer)) {}
 
-    bool ParsingContext::HasBlockInfos() {
+    const base::MemoryBuffer* ParsingContext::GetBitcodeBuffer() const {
+        return &bitcode_storage_;
+    }
+
+    bool ParsingContext::HasBlockInfos() const {
         return !block_infos.empty();
     }
 

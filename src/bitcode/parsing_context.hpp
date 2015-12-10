@@ -14,7 +14,8 @@ namespace bitcode {
     class ParsingContext {
     public:
         explicit ParsingContext(base::MemoryBuffer&& bitcode_buffer);
-        bool HasBlockInfos();
+        const base::MemoryBuffer* GetBitcodeBuffer() const;
+        bool HasBlockInfos() const;
         BlockInfo* GetBlockInfo(uint32_t block_id);
         BlockInfo* GetOrCreateBlockInfo(uint32_t block_id);
     private:

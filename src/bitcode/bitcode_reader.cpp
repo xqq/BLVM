@@ -5,7 +5,7 @@
 namespace blvm {
 namespace bitcode {
 
-    BitcodeReader::BitcodeReader(ParsingContext& parsing_context, base::MemoryBuffer& bitcode_buffer) :
+    BitcodeReader::BitcodeReader(ParsingContext& parsing_context, const base::MemoryBuffer& bitcode_buffer) :
             parsing_context_(parsing_context), buffer_(bitcode_buffer),
             buffer_index_(0), current_word_(0), current_word_bits_left_(0), current_block_(2) {
         FillCurrentWord();
@@ -15,7 +15,7 @@ namespace bitcode {
 
     }
 
-    BitcodeReader::Entry BitcodeReader::ReadNextEntry() {
+    BitcodeReader::Entry BitcodeReader::ReadNextEntry(int flags) {
         while (true) {
             word_t word = Read(current_block_.abbrevid_length);
             switch (word) {
@@ -24,8 +24,10 @@ namespace bitcode {
                 case BuiltinAbbrevId::kEnterSubBlock:
                     return Entry::MakeSubBlock(ReadSubBlockId());
                 case BuiltinAbbrevId::kDefineAbbrev:
-                    current_block_.abbrevs.push_back(ReadAbbrevDefinition());
-                    continue;
+                    if (!(flags & kDontProcessAbbrevDefinitions)) {
+                        current_block_.abbrevs.push_back(ReadAbbrevDefinition());
+                        continue;
+                    } // else: fallthrough
                 case BuiltinAbbrevId::kUnabbrevRecord:
                 default:
                     return Entry::MakeRecord((uint32_t)word);
@@ -142,17 +144,22 @@ namespace bitcode {
         }
     }
 
+    // Having read the ENTER_SUBBLOCK abbrevid (by ReadNextEntry())
     uint32_t BitcodeReader::ReadSubBlockId() {
         return ReadVBR(CommonBitWidth::kBlockIdWidth);
     }
 
-    // Having read ENTER_SUBBLOCK abbrevid, and the blockid(vbr8) operand
+    // Having read the ENTER_SUBBLOCK abbrevid, and the blockid(vbr8) operand
     void BitcodeReader::EnterSubBlock(uint32_t block_id) {
         Block block;
         block.block_id = block_id;
         block.abbrevid_length = ReadVBR(CommonBitWidth::kNewAbbrevIdWidth);
         SkipTo32bitsBoundary();
         block.block_size = (uint32_t)Read(CommonBitWidth::kBlockSizeWidth);
+
+        BlockInfo* block_info = parsing_context_.GetBlockInfo(block_id);
+        if (block_info)
+            block.abbrevs.insert(block.abbrevs.end(), block_info->abbrevs.begin(), block_info->abbrevs.end());
 
         if (block.block_size >= buffer_.size())
             throw ReaderException(ReaderError::kDataError);
@@ -173,7 +180,7 @@ namespace bitcode {
         SeekToBitPos(GetCurrentBitPos() + block_size_bytes * 4 * 8);
     }
 
-    // Having read the END_BLOCK abbrevid
+    // Having read the END_BLOCK abbrevid (by ReadNextEntry())
     void BitcodeReader::ReadBlockEnd() {
         SkipTo32bitsBoundary();
         PopBlockScope();
@@ -187,7 +194,7 @@ namespace bitcode {
         block_stack_.pop();
     }
 
-    // Having read the DEFINE_ABBREV abbrevid
+    // Having read the DEFINE_ABBREV abbrevid (by ReadNextEntry())
     AbbrevRef BitcodeReader::ReadAbbrevDefinition() {
         base::RefPtr<Abbreviation> abbrev = new Abbreviation();
 
@@ -245,6 +252,7 @@ namespace bitcode {
         return current_block_.abbrevs[abbrev_index];
     }
 
+    // UNABBREV_RECORD or processed abbrev record
     uint32_t BitcodeReader::ReadRecord(uint32_t abbrevid, std::vector<uint64_t>& out_ops) {
         if (abbrevid == BuiltinAbbrevId::kUnabbrevRecord) {
             uint32_t code = ReadVBR(6);
@@ -259,7 +267,7 @@ namespace bitcode {
         if (abbrev->GetOperandCount() == 0)
             throw ReaderException(ReaderError::kDataError);
 
-        const AbbrevOp& code_op = abbrev->GetOperandInfoAt(abbrevid);
+        const AbbrevOp& code_op = abbrev->GetOperandInfoAt(0);
         uint32_t code;
         if (code_op.IsLiteral()) {
             code = (uint32_t)code_op.GetLiteralValue();
