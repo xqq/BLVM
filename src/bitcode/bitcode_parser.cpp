@@ -202,7 +202,7 @@ namespace bitcode {
                         throw ParserException(ParserError::kDataError);
                     std::string record_name;
                     if (ops.size() > 1) {
-                        for (int i = 1; i < ops.size(); i++)
+                        for (size_t i = 1; i < ops.size(); i++)
                             record_name.push_back((char)ops[i]);
                     }
                     target_blockinfo->record_names.push_back(std::make_pair((uint32_t)ops[0], std::move(record_name)));
