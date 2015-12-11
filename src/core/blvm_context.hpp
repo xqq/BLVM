@@ -18,6 +18,8 @@ namespace core {
         TypeRef type_label_, type_metadata_;
         TypeRef type_int1_, type_int8_, type_int16_, type_int32_, type_int64_;
 
+        friend class Type;
+        friend class IntegerType;
         DISALLOW_COPY_AND_ASSIGN(BLVMContext);
     };
 

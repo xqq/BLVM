@@ -51,7 +51,7 @@ namespace bitcode {
         kGrpCodeEntry = 3
     };
 
-    enum class TypeCodes {
+    enum class TypeCodes : uint32_t {
         kNumEntry = 1,
 
         kVoid = 2,

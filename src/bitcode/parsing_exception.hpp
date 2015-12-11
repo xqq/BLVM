@@ -29,8 +29,9 @@ namespace bitcode {
 
 
     enum class ParserError : int {
-        kDataError = 1,
-        kNotSupproted = 2,
+        kDataNotEnough = 1,
+        kDataError = 2,
+        kNotSupproted = 3,
     };
 
     class ParserException : public std::exception {
