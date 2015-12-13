@@ -1,12 +1,11 @@
 #include <cstdio>
 
 namespace blvm {
-    extern int dummy_func(void *ptr);
+    extern int dummy_parse(const char* filename);
 }
 
 int main(int argc, char** argv) {
-    int i = 233;
-    int ret = blvm::dummy_func(&i);
+    int ret = blvm::dummy_parse("test.bc");
     printf("Hello world! ret = %d\n", ret);
     return 0;
 }
