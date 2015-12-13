@@ -83,7 +83,7 @@ namespace bitcode {
                     default:
                         reader_.SkipSubBlock(entry.id);
                 }
-            } else {    // record
+            } else if (entry.kind == Entry::Kind::kRecord) {
                 std::vector<uint64_t> ops;
                 uint32_t record_code = reader_.ReadRecord(entry.id, ops);
 
@@ -219,18 +219,24 @@ namespace bitcode {
         reader_.EnterSubBlock(BlockIds::kTypeBlock);
 
         std::vector<uint64_t> ops;
+        size_t entries = 0;
+        std::string current_struct_typename;
 
-        // Parse TYPE_CODE_NUMENTRY
-        uint32_t code = reader_.ReadRecord(reader_.ReadNextEntry().id, ops);
-        if (code != static_cast<uint32_t>(TypeCodes::kNumEntry) || ops.size() != 1)
-            throw ParserException(ParserError::kDataError);
-
-        size_t entries = static_cast<size_t>(ops[0]);
-
-        for (size_t i = 0; i <= entries; i++) {
+        while (true) {
             Entry entry = reader_.ReadNextEntry();
-            if (entry.kind != Entry::Kind::kRecord)
-                throw ParserException(ParserError::kDataError);
+
+            switch (entry.kind) {
+                case Entry::Kind::kError:
+                case Entry::Kind::kSubBlock:
+                    throw ParserException(ParserError::kDataError);
+                case Entry::Kind::kEndBlock:
+                    if (entries != 0 && module_.type_table.size() != entries)
+                        throw ParserException(ParserError::kDataError);
+                    reader_.ReadBlockEnd();
+                    return;
+                case Entry::Kind::kRecord:
+                    break;
+            }
 
             ops.clear();
             TypeCodes type_code = static_cast<TypeCodes>(reader_.ReadRecord(entry.id, ops));
@@ -239,7 +245,10 @@ namespace bitcode {
 
             switch (type_code) {
                 case TypeCodes::kNumEntry:
-                    throw ParserException(ParserError::kDataError);
+                    if (ops.size() < 1 || entries != 0)
+                        throw ParserException(ParserError::kDataError);
+                    entries = static_cast<size_t>(ops[0]);
+                    continue;
                 case TypeCodes::kVoid:
                 case TypeCodes::kHalf:
                 case TypeCodes::kFloat:
@@ -261,41 +270,131 @@ namespace bitcode {
                     }
                     break;
                 }
-                case TypeCodes::kPointer:
-                    if (ops.size() >= 1) {
-                        uint32_t address_space = 0;
-                        if (ops.size() >= 2)
-                            address_space = static_cast<uint32_t>(ops[1]);
-                        result_type = new PointerType((uint32_t)ops[0], address_space);
-                    } else {
+                case TypeCodes::kPointer: {
+                    if (ops.size() < 1)
                         throw ParserException(ParserError::kDataNotEnough);
-                    }
-                    break;
-                case TypeCodes::kArray:
+
+                    uint32_t target_type_index = static_cast<uint32_t>(ops[0]);
+                    if (!module_.IsValidTypeIndex(target_type_index))
+                        throw ParserException(ParserError::kDataError);
+                    if (!PointerType::IsValidTargetType(module_.type_table[target_type_index]->GetTypeCode()))
+                        throw ParserException(ParserError::kNotSupproted);
+
+                    uint32_t address_space = 0;
                     if (ops.size() >= 2)
-                        result_type = new ArrayType((uint32_t) ops[0], (uint32_t) ops[1]);
-                    else
-                        throw ParserException(ParserError::kDataNotEnough);
+                        address_space = static_cast<uint32_t>(ops[1]);
+                    result_type = new PointerType(target_type_index, address_space);
                     break;
-                case TypeCodes::kVector:
-                    if (ops.size() >= 2)
-                        result_type = new VectorType((uint32_t)ops[0], (uint32_t)ops[1]);
-                    else
+                }
+                case TypeCodes::kArray: {
+                    if (ops.size() < 2)
                         throw ParserException(ParserError::kDataNotEnough);
+
+                    uint32_t element_type_index = static_cast<uint32_t>(ops[1]);
+                    if (!module_.IsValidTypeIndex(element_type_index) ||
+                        !ArrayType::IsValidElementType(module_.type_table[element_type_index]->GetTypeCode()))
+                        throw ParserException(ParserError::kDataError);
+
+                    result_type = new ArrayType((uint32_t)ops[0], element_type_index);
                     break;
+                }
+                case TypeCodes::kVector: {
+                    if (ops.size() < 2)
+                        throw ParserException(ParserError::kDataNotEnough);
+
+                    if (ops[0] == 0)
+                        throw ParserException(ParserError::kDataError);
+
+                    uint32_t element_type_index = static_cast<uint32_t>(ops[1]);
+                    if (!module_.IsValidTypeIndex(element_type_index) ||
+                        !VectorType::IsValidElementType(module_.type_table[element_type_index]->GetTypeCode()))
+                        throw ParserException(ParserError::kDataError);
+
+                    result_type = new VectorType((uint32_t)ops[0], element_type_index);
+                    break;
+                }
                 case TypeCodes::kOpaque:
-                case TypeCodes::kStruct_ANON:
-                case TypeCodes::kStruct_NAME:  // TODO: This isn't a type declaration
-                case TypeCodes::kStruct_NAMED:
-                case TypeCodes::kFunction_Old:
-                case TypeCodes::kFunction:
+                    if (ops.size() != 1)
+                        throw ParserException(ParserError::kDataError);
+
+                    result_type = new StructType(false, current_struct_typename);
+                    current_struct_typename.clear();
                     break;
+                case TypeCodes::kStruct_NAME:
+                    current_struct_typename.clear();
+                    ConvertOpsToString(ops, current_struct_typename);
+                    continue;
+                case TypeCodes::kStruct_NAMED:
+                case TypeCodes::kStruct_ANON: {
+                    if (ops.size() < 1)
+                        throw ParserException(ParserError::kDataError);
+
+                    bool ispacked = (ops[0] != 0);
+                    std::vector<uint32_t> members;
+                    for (size_t i = 1; i < ops.size(); i++) {
+                        uint32_t type_index = static_cast<uint32_t>(ops[i]);
+                        if (!module_.IsValidTypeIndex(type_index) ||
+                            !StructType::IsValidMemberType(module_.type_table[type_index]->GetTypeCode())) {
+                            throw ParserException(ParserError::kDataError);
+                        }
+                        members.push_back(type_index);
+                    }
+
+                    if (type_code == TypeCodes::kStruct_NAMED) {
+                        result_type = new StructType(ispacked, current_struct_typename);
+                        current_struct_typename.clear();
+                    } else {
+                        result_type = new StructType(ispacked);
+                    }
+                    if (ops.size() >= 2)
+                        static_cast<StructType*>(result_type.Get())->FillMembers(std::move(members));
+                    break;
+                }
+                case TypeCodes::kFunction_Old: {
+                    // format: [FUNCTION, vararg, ignored, retty, ...paramty...]
+                    if (ops.size() < 3)
+                        throw ParserException(ParserError::kDataNotEnough);
+
+                    std::vector<uint32_t> params;
+                    for (size_t i = 3; i < ops.size(); i++) {
+                        uint32_t param_type = static_cast<uint32_t>(ops[i]);
+                        if (!module_.IsValidTypeIndex(param_type))
+                            throw ParserException(ParserError::kDataError);
+                        if (!FunctionType::IsValidArgumentType(module_.type_table[param_type]->GetTypeCode()))
+                            throw ParserException(ParserError::kDataError);
+                        params.push_back(param_type);
+                    }
+                    bool is_vararg = (ops[0] != 0);
+                    uint32_t retty = static_cast<uint32_t>(ops[2]);
+                    result_type = new FunctionType(is_vararg, retty, std::move(params));
+                    break;
+                }
+                case TypeCodes::kFunction: {
+                    // format: [FUNCTION, vararg, retty, ...paramty...]
+                    if (ops.size() < 2)
+                        throw ParserException(ParserError::kDataNotEnough);
+
+                    std::vector<uint32_t> params;
+                    for (size_t i = 2; i < ops.size(); i++) {
+                        uint32_t param_type = static_cast<uint32_t>(ops[i]);
+                        if (!module_.IsValidTypeIndex(param_type))
+                            throw ParserException(ParserError::kDataError);
+                        if (!FunctionType::IsValidArgumentType(module_.type_table[param_type]->GetTypeCode()))
+                            throw ParserException(ParserError::kDataError);
+                        params.push_back(param_type);
+                    }
+                    bool is_vararg = (ops[0] != 0);
+                    uint32_t retty = static_cast<uint32_t>(ops[1]);
+                    result_type = new FunctionType(is_vararg, retty, std::move(params));
+                    break;
+                }
                 default:
                     throw ParserException(ParserError::kNotSupproted);
             }
+            if (result_type == nullptr)
+                throw ParserException(ParserError::kInternalError);
             module_.type_table.push_back(std::move(result_type));
         }
-        reader_.ReadBlockEnd();  // TODO: ReadBlockEnd should be after ReadNextEntry, not guess
     }
 
 }

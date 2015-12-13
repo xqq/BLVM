@@ -8,5 +8,8 @@ namespace core {
 
     }
 
+    Module::~Module() {
+
+    }
 }
 }

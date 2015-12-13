@@ -31,7 +31,6 @@ namespace core {
             default:
                 return nullptr;
         }
-        return nullptr;
     }
 
     bool IntegerType::IsCommonBitwidth(uint32_t bit_width) {
@@ -55,6 +54,38 @@ namespace core {
                 return context.type_int64_;
         }
         return nullptr;
+    }
+
+    bool PointerType::IsValidTargetType(bitcode::TypeCodes type_code) {
+        return type_code != TypeCodes::kVoid &&
+               type_code != TypeCodes::kLabel &&
+               type_code != TypeCodes::kMetadata;
+    }
+
+    bool ArrayType::IsValidElementType(bitcode::TypeCodes type_code) {
+        return type_code != TypeCodes::kVoid &&
+               type_code != TypeCodes::kLabel &&
+               type_code != TypeCodes::kMetadata &&
+               type_code != TypeCodes::kFunction &&
+               type_code != TypeCodes::kFunction_Old;
+    }
+
+    bool VectorType::IsValidElementType(bitcode::TypeCodes type_code) {
+        return type_code == TypeCodes::kInteger ||
+               type_code == TypeCodes::kHalf ||
+               type_code == TypeCodes::kFloat ||
+               type_code == TypeCodes::kDouble ||
+               type_code == TypeCodes::kPointer;
+    }
+
+    bool StructType::IsValidMemberType(bitcode::TypeCodes type_code) {
+        return ArrayType::IsValidElementType(type_code);
+    }
+
+    bool FunctionType::IsValidArgumentType(TypeCodes type_code) {
+        return type_code != TypeCodes::kVoid &&
+               type_code != TypeCodes::kFunction &&
+               type_code != TypeCodes::kFunction_Old;
     }
 
 }

@@ -21,6 +21,10 @@ namespace core {
         std::vector<std::string> gc_name_table;
     public:
         Module();
+        ~Module();
+        bool IsValidTypeIndex(uint32_t type_index) {
+            return type_index < type_table.size();
+        }
     private:
 
     };

@@ -56,7 +56,8 @@ namespace blvm {
 
         printf("module_version: %d\n", module.module_version);
         printf("datalayout: %s\n", module.target_datalayout.c_str());
-        printf("target_triple: %s\n\n", module.target_triple.c_str());
+        printf("target_triple: %s\n", module.target_triple.c_str());
+        printf("type_count: %d\n\n", (int)module.type_table.size());
 
 
         return pfoo->Fuck(233);

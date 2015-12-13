@@ -32,6 +32,7 @@ namespace bitcode {
         kDataNotEnough = 1,
         kDataError = 2,
         kNotSupproted = 3,
+        kInternalError = 4
     };
 
     class ParserException : public std::exception {
