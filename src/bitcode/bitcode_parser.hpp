@@ -25,6 +25,7 @@ namespace bitcode {
         void ParseModuleBlock();
         void ParseBlockInfoBlock();
         void ParseTypeBlock();
+        void ParseParamattrBlock();
     private:
         core::BLVMContext& context_;
         ParsingContext& parsing_context_;

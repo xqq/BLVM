@@ -120,9 +120,18 @@ namespace bitcode {
                     case ModuleCodes::kGlobalVar:
 
                         break;
-                    case ModuleCodes::kFunction:
+                    case ModuleCodes::kFunction: {
+                        if (ops.size() < 8)
+                            throw ParserException(ParserError::kDataNotEnough);
+
+                        if (!module_.IsValidTypeIndex((uint32_t)ops[0]))
+                            throw ParserException(ParserError::kDataError);
+
+                        core::TypeRef function_type = module_.type_table[ops[0]];
+
 
                         break;
+                    }
                     case ModuleCodes::kAlias:
 
                         break;
@@ -394,6 +403,50 @@ namespace bitcode {
             if (result_type == nullptr)
                 throw ParserException(ParserError::kInternalError);
             module_.type_table.push_back(std::move(result_type));
+        }
+    }
+
+    void BitcodeParser::ParseParamattrBlock() {
+        using Entry = BitcodeReader::Entry;
+
+        reader_.EnterSubBlock(BlockIds::kParamattrBlock);
+
+        std::vector<uint64_t> ops;
+
+        while (true) {
+            Entry entry = reader_.ReadNextEntry();
+
+            switch (entry.kind) {
+                case Entry::Kind::kError:
+                case Entry::Kind::kSubBlock:
+                    throw ParserException(ParserError::kDataError);
+                case Entry::Kind::kEndBlock:
+                    reader_.ReadBlockEnd();
+                    return;
+                case Entry::Kind::kRecord:
+                    break;
+            }
+
+            ops.clear();
+            uint32_t code = reader_.ReadRecord(entry.id, ops);
+
+            switch (code) {
+                case AttributeCodes::kEntryOld:
+                    for (size_t i = 0; i < ops.size(); i += 2) {
+
+                    }
+
+                    break;
+                case AttributeCodes::kEntry:
+
+                    break;
+                case AttributeCodes::kGrpCodeEntry:
+
+                    break;
+                default:
+                    break;
+            }
+
         }
     }
 
