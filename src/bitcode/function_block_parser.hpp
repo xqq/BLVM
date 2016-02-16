@@ -1,0 +1,12 @@
+#ifndef _BLVM_BITCODE_FUNCTION_BLOCK_PARSER_HPP
+#define _BLVM_BITCODE_FUNCTION_BLOCK_PARSER_HPP
+
+namespace blvm {
+namespace bitcode {
+
+
+
+}
+}
+
+#endif // _BLVM_BITCODE_FUNCTION_BLOCK_PARSER_HPP

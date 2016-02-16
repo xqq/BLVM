@@ -1,3 +1,5 @@
 BLVM
 ====
 Deprecated Spicy Chicken
+
+THIS PROJECT IS NO LONGER ACTIVE. DO NOT LOOK AT HERE.

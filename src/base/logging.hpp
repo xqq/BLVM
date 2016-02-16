@@ -2,6 +2,7 @@
 #define _BLVM_CORE_LOGGING_HPP
 
 #include <cstdarg>
+#include <cstdio>
 
 #if defined(__ANDROID__)
 #include <android/log.h>
@@ -26,7 +27,15 @@
         #define LOGD(...) ((void)0)
     #endif
 #elif defined(__APPLE__)
-    #define LOGE(...) ((void)StderrLogger::PrintLog(BLVM_LOG_LEVEL_ERROR, __VA_ARGS__))
+    #define LOGI(...) ((void)fprintf(stderr, __VA_ARGS__))
+    #define LOGE(...) LOGI(__VA_ARGS__)
+    #define LOGW(...) LOGI(__VA_ARGS__)
+
+    #ifndef NDEBUG
+        #define LOGD(...) LOGI(__VA_ARGS__)
+    #else
+        #define LOGD(...) ((void)0)
+    #endif
 #elif defined(_WIN32)
 
 #else
@@ -39,13 +48,11 @@ namespace base {
 
 #ifdef _WIN32
     class Win32Logger {
+    public:
         static void PrintLog(int level, const char* format, va_list args);
     };
 #endif
 
-    class StderrLogger {
-        static void PrintLog(int level, const char* format, va_list args);
-    };
 }
 }
 
