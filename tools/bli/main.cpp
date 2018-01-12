@@ -5,7 +5,7 @@ namespace blvm {
 }
 
 int main(int argc, char** argv) {
-    int ret = blvm::dummy_parse("D:\\em-workspace\\test.bc");
+    int ret = blvm::dummy_parse("test.bc");
     printf("Hello world! ret = %d\n", ret);
     return 0;
 }
